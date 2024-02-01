@@ -26,15 +26,25 @@ body {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     grid-template-rows: repeat(5, 1fr);
-    gap: 10px;
+    gap: 5px;
     width: 500px;
     height: 500px;
     
     background-color:black; 
     border: 10px solid rgb(6, 6, 6);
-    
 }
-.grid-item {
+
+.players-container{
+    display: flex;
+    justify-content: space-between;
+}
+
+.player{
+    width: 45%;
+    box-sizing: border-box;
+}
+
+.grid-item , .grid-item1 , .grid-item2{
     display: flex;
     justify-content: center;
     align-items: center;

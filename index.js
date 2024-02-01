@@ -4,6 +4,13 @@ window.onload = function() {
     var gridItems1 = document.getElementsByClassName('grid-item1');
     var gridItems2 = document.getElementsByClassName('grid-item2');
     var universal_counter=1;
+    var currentPlayer = 'player1';
+
+//set player name:
+    var p1 = localStorage.getItem('player1Name');
+    var p2 = localStorage.getItem('player2Name');
+    document.getElementById('player1-name').textContent=p1;
+    document.getElementById('player2-name').textContent=p2;
 
     var player = player || {
         player1_visited: Array(5).fill().map(() => Array(5).fill(false)),
@@ -46,6 +53,7 @@ window.onload = function() {
     createGrid(container1, 'player1');
     createGrid(container2, 'player2');
 
+    document.getElementById('current-player-name').textContent = `GAME Not Started`;
     function playGame(event, player, playerKey, gridItems, otherPlayerKey, otherPlayerGrid) {
         
         if(event.target.className === 'grid-item') {
@@ -58,6 +66,10 @@ window.onload = function() {
                 universal_counter++;
             } 
             if(player[playerKey + '_count'] == 27 && universal_counter == 52 ) {
+                //set currentPlayer
+                if (currentPlayer != playerKey) return;
+                document.getElementById('current-player-name').textContent = `${currentPlayer === 'player1' ? p2 : p1}'s Turn`;
+
                 event.target.style.textDecoration = "line-through";
                 event.target.style.backgroundColor = "red";
                 player[playerKey + '_visited'][row][col] = true;
@@ -89,11 +101,17 @@ window.onload = function() {
                 if (bingoCount1>=5 && bingoCount2>=5){winner=3;isGameOver=true;}
                 else if (bingoCount1>=5){winner=1;isGameOver=true;}
                 else if (bingoCount2>=5){winner=2;isGameOver=true;}
+                
+                currentPlayer = currentPlayer == 'player1' ? 'player2':'player1';
             }
             if(isGameOver){
                 if(winner == 3) {alert("!!!!DRAW!!!!");}
-                else if(winner == 1) {alert(`${playerKey} won`);}
-                else if(winner == 2) {alert(`${otherPlayerKey} won`);}
+                else if(winner == 1) {
+                    var playerWin = playerKey=='player1'?p1:p2;
+                    alert(`${playerWin} won`);}
+                else if(winner == 2) {
+                    var playerWin = otherPlayerKey == 'player1'?p1:p2;
+                    alert(`${playerWin} won`);}
             }
             if(player[playerKey + '_count'] == 26) player[playerKey + '_count'] = 27;
             if(universal_counter == 51) universal_counter = 52;

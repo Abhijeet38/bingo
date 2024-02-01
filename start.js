@@ -6,5 +6,5 @@ document.getElementById('start-form').addEventListener('submit', function(event)
     localStorage.setItem('player1Name', player1Name);
     localStorage.setItem('player2Name', player2Name);
 
-    window.location.href = 'index.html';
+    window.location.href = 'index1.html';
 });

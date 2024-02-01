@@ -1,9 +1,17 @@
 window.onload = function() {
-    var container = document.getElementById('grid-container');
-    var gridItems = document.getElementsByClassName('grid-item');
-    var count = 1;
-    var grid = Array(5).fill().map(() => Array(5).fill(false));
-    var visited = Array(5).fill().map(() => Array(5).fill(false));
+    var container1 = document.getElementById('grid-container1');
+    var container2 = document.getElementById('grid-container2');
+    var gridItems1 = document.getElementsByClassName('grid-item1');
+    var gridItems2 = document.getElementsByClassName('grid-item2');
+    var universal_counter=1;
+
+    var player = player || {
+        player1_visited: Array(5).fill().map(() => Array(5).fill(false)),
+        player1_count: 1,
+
+        player2_visited: Array(5).fill().map(() => Array(5).fill(false)),
+        player2_count: 1,
+    }
 
     function checkBINGO(grid){
         let rowFilled=0,colFilled=0,diagonalFilled=0,diag1=0,diag2=0;
@@ -23,41 +31,80 @@ window.onload = function() {
         return rowFilled+colFilled+diagonalFilled;
     }
 
-    //create grid: 1 to 25
-    for (var i = 1; i <= 25; i++) {
-        var div = document.createElement('div');
-        div.className = 'grid-item';
-        div.dataset.row = Math.floor((i - 1) / 5);
-        div.dataset.col = (i - 1) % 5;
-        container.appendChild(div);
+    function createGrid(container,playerKey){
+        for (var i = 1; i <= 25; i++) {
+            var div = document.createElement('div');
+            div.className = 'grid-item';
+            div.id = playerKey + i;
+            div.dataset.row = Math.floor((i - 1) / 5);
+            div.dataset.col = (i - 1) % 5;
+            container.appendChild(div);
+        }
     }
 
-    container.addEventListener('click', function(event) {
+    //create grid:
+    createGrid(container1, 'player1');
+    createGrid(container2, 'player2');
+
+    function playGame(event, player, playerKey, gridItems, otherPlayerKey, otherPlayerGrid) {
+        
         if(event.target.className === 'grid-item') {
             var row = event.target.dataset.row;
             var col = event.target.dataset.col;
             let isGameOver = false;
+            let winner = 0;  // 0->no winner yet, 1-> curr_player, 2-> other_player, 3->draw
             if(event.target.textContent === "") {
-                event.target.textContent = count++;
-                grid[row][col] = true;
+                event.target.textContent = player[playerKey + '_count']++;
+                universal_counter++;
             } 
-            if(count > 26) {
+            if(player[playerKey + '_count'] == 27 && universal_counter == 52 ) {
                 event.target.style.textDecoration = "line-through";
                 event.target.style.backgroundColor = "red";
-                visited[row][col] = true;
-                let bingoCount = checkBINGO(visited);
-                for(let i=0;i<Math.min(5,bingoCount);i++){
+                player[playerKey + '_visited'][row][col] = true;
+                
+                //mark other player's box
+                for(let i=1;i<=25;i++){
+                    var otherBox = document.getElementById(otherPlayerKey+i);
+                    var boxRow = Math.floor((i-1)/5);
+                    var boxCol = (i-1)%5;
+                    let num = otherBox.textContent;
+                    if( num == event.target.textContent){
+                        otherBox.style.backgroundColor = "red";
+                        otherBox.style.textDecoration = "line-through";
+                        player[otherPlayerKey + '_visited'][boxRow][boxCol] = true;
+                    }
+                }
+                //
+
+                let bingoCount1 = checkBINGO(player[playerKey + '_visited']);
+                let bingoCount2 = checkBINGO(player[otherPlayerKey + '_visited']);
+                for(let i=0;i<Math.min(5,bingoCount1);i++){
                     gridItems[i].style.backgroundColor="yellow";
                     gridItems[i].style.textDecoration = "line-through";
                 }
-                if (bingoCount>=5){isGameOver=true;}
+                for(let i=0;i<Math.min(5,bingoCount2);i++){
+                    otherPlayerGrid[i].style.backgroundColor="yellow";
+                    otherPlayerGrid[i].style.textDecoration = "line-through";
+                }
+                if (bingoCount1>=5 && bingoCount2>=5){winner=3;isGameOver=true;}
+                else if (bingoCount1>=5){winner=1;isGameOver=true;}
+                else if (bingoCount2>=5){winner=2;isGameOver=true;}
             }
             if(isGameOver){
-                alert("Game-Over");
+                if(winner == 3) {alert("!!!!DRAW!!!!");}
+                else if(winner == 1) {alert(`${playerKey} won`);}
+                else if(winner == 2) {alert(`${otherPlayerKey} won`);}
             }
-            if(count == 26) count=27;
+            if(player[playerKey + '_count'] == 26) player[playerKey + '_count'] = 27;
+            if(universal_counter == 51) universal_counter = 52;
         }
-        
+    }
+    
+    container1.addEventListener('click', function(event){
+        playGame(event, player, 'player1', gridItems1, 'player2', gridItems2);
     });
 
+    container2.addEventListener('click', function(event){
+        playGame(event, player, 'player2', gridItems2, 'player1', gridItems1);
+    });
 };
